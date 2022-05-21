@@ -4,7 +4,7 @@ public class Bot {
 	
 	public static void main(String[] args) throws Exception {
 		HttpURLConnection url = new HttpURLConnection();
-		url.sendGet();
+		System.out.println(url.sendGetMetaInfo());
 		
 		DiscordApi api = new DiscordApiBuilder()
 				.setToken("OTc3MTE2NzkwODE3Njg5NjMy.GHH4Mw.aeiV7SkJgKt27fGNVmMrLElifiE5sq1SPNkHoQ")
