@@ -1,31 +1,13 @@
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import org.javacord.api.*;
+import org.json.JSONObject;
 
 public class Bot {
 	
-	public static void main(String[] args) throws Exception {
-		HttpURLConnection url = new HttpURLConnection();
-		String jsonMeta = url.sendGETMetaInfo();
-		
-		System.out.println(jsonMeta);
-		
-		JSONParser parser = new JSONParser(jsonMeta);
-		ArrayList<String> names = parser.getNames();
-		
-		for (String string : names) {
-			System.out.println(string);
-		}
-		
-		System.out.println("\n" + parser.getPathByName("расписание 24.05.2022.pdf"));
-		
-		
-		
-		
-		
-		
-		
-		
+	public static void main(String[] args) {   
 		// Initialize bot
 		DiscordApi api = new DiscordApiBuilder()
 				.setToken("OTc3MTE2NzkwODE3Njg5NjMy.GHH4Mw.aeiV7SkJgKt27fGNVmMrLElifiE5sq1SPNkHoQ")
@@ -38,6 +20,54 @@ public class Bot {
 			}
 		});
 		
+		try {
+			formMessage();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static String formMessage() throws Exception {
+		// GET meta information request
+		HttpURLConnection url = new HttpURLConnection();
+		String jsonMeta = url.sendGETMetaInfo();
 		
+		JSONParser metaParser = new JSONParser(jsonMeta);
+		ArrayList<String> names = metaParser.getNames();
+		
+		// Print all names
+//		for (String string : names) {
+//			System.out.println(string);
+//		}
+		
+		// Get today date
+		Date date = new Date();
+		SimpleDateFormat formatForDateNow = new SimpleDateFormat("dd.MM.yyyy");
+
+	    String today = formatForDateNow.format(date);
+		
+	    // Find path for tomorrow timetable
+	    String tommorowName = null;
+	    for (int i = 0; i < names.size(); i++) {
+	    	if (names.get(i).contains(today)) {
+				tommorowName = names.get(i + 1);
+			}
+		}
+	    if (tommorowName == null) {
+	    	return "No schedule available";
+	    }
+	    
+	    String path = metaParser.getPathByName(tommorowName);
+	    path = path.replaceAll("\\s", "%20");
+	    
+	    // GET download request
+	    String downloadJsonStr = url.sendGETDownload(path);    
+	    JSONObject downloadJson = new JSONObject(downloadJsonStr);
+	    String downloadLink = downloadJson.getString("href");
+	    
+	    String pdf = url.sendGETFile(downloadLink);
+	    System.out.println(pdf);
+	    
+	    return "";
 	}
 }

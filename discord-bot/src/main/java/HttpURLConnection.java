@@ -8,12 +8,12 @@ import org.apache.http.util.EntityUtils;
 public class HttpURLConnection {
 	String apiUrl = "https://cloud-api.yandex.net/v1/disk/public/resources";
 	String publicKey = "public_key=https://disk.yandex.ru/d/0vmvyzN6Yfd43A";
+	String limit = "limit=35";
 	
 	String sendGETMetaInfo() throws Exception {
 		String path = "path=/Красноярский%20рабочий%20156";
-
 		final CloseableHttpClient httpClient = HttpClients.createDefault();
-		HttpGet request = new HttpGet(apiUrl + "?" + publicKey + "&" + path);
+		HttpGet request = new HttpGet(apiUrl + "?" + publicKey + "&" + path + "&" + limit);
 
 		// Add headers
 		request.addHeader("Authorization", "OAuth AQAAAAAaCyCpAAfrEARFPPVBd0A5tIusMr8jsg4");
@@ -35,7 +35,7 @@ public class HttpURLConnection {
 
 	String sendGETDownload(String path) throws Exception {
 		final CloseableHttpClient httpClient = HttpClients.createDefault();
-		HttpGet request = new HttpGet(apiUrl + "?" + publicKey + "&" + path);
+		HttpGet request = new HttpGet(apiUrl + "/download" + "?" + publicKey + "&" + path);
 		
 		// Add headers
 		request.addHeader("Authorization", "OAuth AQAAAAAaCyCpAAfrEARFPPVBd0A5tIusMr8jsg4");
@@ -53,5 +53,25 @@ public class HttpURLConnection {
 		
 		return null;
 	}
-	
+
+	String sendGETFile(String link) throws Exception {
+		final CloseableHttpClient httpClient = HttpClients.createDefault();
+		HttpGet request = new HttpGet(link);
+		
+		// Add headers
+		request.addHeader("Authorization", "OAuth AQAAAAAaCyCpAAfrEARFPPVBd0A5tIusMr8jsg4");
+		request.addHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+		
+		// Get entity
+		try (CloseableHttpResponse response = httpClient.execute(request)) {
+			HttpEntity entity = response.getEntity();
+
+			if (entity != null) {
+				String body = EntityUtils.toString(entity);
+				return body;
+			}
+		}
+		
+		return null;
+	}
 }

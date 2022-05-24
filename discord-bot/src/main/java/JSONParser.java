@@ -26,7 +26,6 @@ public class JSONParser {
 	public String getPathByName (String name) {
 		for (int i = 0; i < jsonArr.length(); i++) {
 			String n = jsonArr.getJSONObject(i).getString("name");
-			
 			if(n.equals(name)) {
 				return jsonArr.getJSONObject(i).getString("path");
 			}
@@ -34,6 +33,4 @@ public class JSONParser {
 		
 		return null;
 	}
-	
-	
 }
