@@ -92,19 +92,19 @@ public class HttpURLConnection {
 			}
 			
 			// Create file in downloads
-//			InputStream is = entity.getContent();
-//			ReadableByteChannel rbc = Channels.newChannel(is);
-//		    FileOutputStream fos = new FileOutputStream("C:/Users/daun2146/Downloads/timetable.pdf");
-//		    
-//		    long filePosition = 0;
-//	        long transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
-//
-//	        while(transferedBytes == Long.MAX_VALUE){
-//	            filePosition += transferedBytes;
-//	            transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
-//	        }
-//	        rbc.close();
-//	        fos.close();
+			InputStream is = entity.getContent();
+			ReadableByteChannel rbc = Channels.newChannel(is);
+		    FileOutputStream fos = new FileOutputStream("C:/Users/daun2146/Downloads/timetable.pdf");
+		    
+		    long filePosition = 0;
+	        long transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
+
+	        while(transferedBytes == Long.MAX_VALUE){
+	            filePosition += transferedBytes;
+	            transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
+	        }
+	        rbc.close();
+	        fos.close();
 		}
 		
 	}
