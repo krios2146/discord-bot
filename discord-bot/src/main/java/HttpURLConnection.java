@@ -1,3 +1,8 @@
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+
 import org.apache.http.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -18,7 +23,10 @@ public class HttpURLConnection {
 		// Add headers
 		request.addHeader("Authorization", "OAuth AQAAAAAaCyCpAAfrEARFPPVBd0A5tIusMr8jsg4");
 		request.addHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-
+		
+		// Console
+		System.out.println(request);
+		
 		// Get entity
 		try (CloseableHttpResponse response = httpClient.execute(request)) {
 			HttpEntity entity = response.getEntity();
@@ -35,11 +43,14 @@ public class HttpURLConnection {
 
 	String sendGETDownload(String path) throws Exception {
 		final CloseableHttpClient httpClient = HttpClients.createDefault();
-		HttpGet request = new HttpGet(apiUrl + "/download" + "?" + publicKey + "&" + path);
+		HttpGet request = new HttpGet(apiUrl + "/download" + "?" + publicKey + "&path=" + path);
 		
 		// Add headers
 		request.addHeader("Authorization", "OAuth AQAAAAAaCyCpAAfrEARFPPVBd0A5tIusMr8jsg4");
 		request.addHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+		
+		// Console
+		System.out.println(request);
 		
 		// Get entity
 		try (CloseableHttpResponse response = httpClient.execute(request)) {
@@ -62,13 +73,34 @@ public class HttpURLConnection {
 		request.addHeader("Authorization", "OAuth AQAAAAAaCyCpAAfrEARFPPVBd0A5tIusMr8jsg4");
 		request.addHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
 		
+		// Console
+		System.out.println(request);
+		
 		// Get entity
 		try (CloseableHttpResponse response = httpClient.execute(request)) {
 			HttpEntity entity = response.getEntity();
 
 			if (entity != null) {
-				String body = EntityUtils.toString(entity);
-				return body;
+				// Console
+				Header[] headers = response.getAllHeaders();
+				for (Header header : headers) {
+					System.out.println(header.getName() + " : " + header.getValue());
+				}
+				
+				// Create file in downloads
+				InputStream is = entity.getContent();
+				ReadableByteChannel rbc = Channels.newChannel(is);
+			    FileOutputStream fos = new FileOutputStream("C:/Users/daun2146/Downloads/timetable.pdf");
+			    
+			    long filePosition = 0;
+		        long transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
+
+		        while(transferedBytes == Long.MAX_VALUE){
+		            filePosition += transferedBytes;
+		            transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
+		        }
+		        rbc.close();
+		        fos.close();
 			}
 		}
 		

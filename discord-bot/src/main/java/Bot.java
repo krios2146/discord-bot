@@ -1,8 +1,10 @@
-import java.util.Date;
+import java.util.GregorianCalendar;
+import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.javacord.api.*;
+import org.javacord.api.entity.message.MessageBuilder;
 import org.json.JSONObject;
 
 public class Bot {
@@ -16,48 +18,41 @@ public class Bot {
 		// Message listener
 		api.addMessageCreateListener(message -> {
 			if (message.getMessageContent().equalsIgnoreCase("!table")) {
-				message.getChannel().sendMessage("https://disk.yandex.ru/d/0vmvyzN6Yfd43A/%D0%9A%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D1%8F%D1%80%D1%81%D0%BA%D0%B8%D0%B9%20%D1%80%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20156");
+				String messageText = "";
+				try {
+					messageText = getSchedule();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				MessageBuilder mb = new MessageBuilder();
+				mb.append(messageText)
+			    	.addAttachment(new File("C:/Users/daun2146/Downloads/timetable.pdf"))
+			    	.send(message.getChannel());
 			}
 		});
-		
-		try {
-			formMessage();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
-	private static String formMessage() throws Exception {
+	private static String getSchedule() throws Exception {
 		// GET meta information request
 		HttpURLConnection url = new HttpURLConnection();
 		String jsonMeta = url.sendGETMetaInfo();
 		
 		JSONParser metaParser = new JSONParser(jsonMeta);
-		ArrayList<String> names = metaParser.getNames();
 		
-		// Print all names
-//		for (String string : names) {
-//			System.out.println(string);
-//		}
+		// Get tomorrow date
+		Calendar calendar = new GregorianCalendar();
+		calendar.add(Calendar.DAY_OF_YEAR, 1);
 		
-		// Get today date
-		Date date = new Date();
-		SimpleDateFormat formatForDateNow = new SimpleDateFormat("dd.MM.yyyy");
+		if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+			calendar.add(Calendar.DAY_OF_YEAR, 1);
+		}
 
-	    String today = formatForDateNow.format(date);
+		SimpleDateFormat formatForDate = new SimpleDateFormat("dd.MM.yyyy");
+	    String tomorrow = formatForDate.format(calendar.getTime());
 		
 	    // Find path for tomorrow timetable
-	    String tommorowName = null;
-	    for (int i = 0; i < names.size(); i++) {
-	    	if (names.get(i).contains(today)) {
-				tommorowName = names.get(i + 1);
-			}
-		}
-	    if (tommorowName == null) {
-	    	return "No schedule available";
-	    }
-	    
-	    String path = metaParser.getPathByName(tommorowName);
+	    String path = metaParser.getPathByName(tomorrow);
 	    path = path.replaceAll("\\s", "%20");
 	    
 	    // GET download request
@@ -65,9 +60,8 @@ public class Bot {
 	    JSONObject downloadJson = new JSONObject(downloadJsonStr);
 	    String downloadLink = downloadJson.getString("href");
 	    
-	    String pdf = url.sendGETFile(downloadLink);
-	    System.out.println(pdf);
+	    url.sendGETFile(downloadLink);
 	    
-	    return "";
+	    return "Timetable for " + tomorrow;
 	}
 }
