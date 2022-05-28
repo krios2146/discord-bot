@@ -32,12 +32,12 @@ public class HttpURLConnection {
 			HttpEntity entity = response.getEntity();
 
 			if (entity != null) {
-				String body = EntityUtils.toString(entity);
-				return body;
+				return null;
 			}
+			
+			String body = EntityUtils.toString(entity);
+			return body;
 		}
-
-		return null;
 
 	}
 
@@ -56,16 +56,17 @@ public class HttpURLConnection {
 		try (CloseableHttpResponse response = httpClient.execute(request)) {
 			HttpEntity entity = response.getEntity();
 
-			if (entity != null) {
-				String body = EntityUtils.toString(entity);
-				return body;
+			if (entity == null) {
+				return null;
 			}
+			
+			String body = EntityUtils.toString(entity);
+			return body;
 		}
 		
-		return null;
 	}
 
-	String sendGETFile(String link) throws Exception {
+	void sendGETFile(String link) throws Exception {
 		final CloseableHttpClient httpClient = HttpClients.createDefault();
 		HttpGet request = new HttpGet(link);
 		
@@ -80,30 +81,31 @@ public class HttpURLConnection {
 		try (CloseableHttpResponse response = httpClient.execute(request)) {
 			HttpEntity entity = response.getEntity();
 
-			if (entity != null) {
-				// Console
-				Header[] headers = response.getAllHeaders();
-				for (Header header : headers) {
-					System.out.println(header.getName() + " : " + header.getValue());
-				}
-				
-				// Create file in downloads
-				InputStream is = entity.getContent();
-				ReadableByteChannel rbc = Channels.newChannel(is);
-			    FileOutputStream fos = new FileOutputStream("C:/Users/daun2146/Downloads/timetable.pdf");
-			    
-			    long filePosition = 0;
-		        long transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
-
-		        while(transferedBytes == Long.MAX_VALUE){
-		            filePosition += transferedBytes;
-		            transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
-		        }
-		        rbc.close();
-		        fos.close();
+			if (entity == null) {
+				throw new NullPointerException();
 			}
+			
+			// Console
+			Header[] headers = response.getAllHeaders();
+			for (Header header : headers) {
+				System.out.println(header.getName() + " : " + header.getValue());
+			}
+			
+			// Create file in downloads
+//			InputStream is = entity.getContent();
+//			ReadableByteChannel rbc = Channels.newChannel(is);
+//		    FileOutputStream fos = new FileOutputStream("C:/Users/daun2146/Downloads/timetable.pdf");
+//		    
+//		    long filePosition = 0;
+//	        long transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
+//
+//	        while(transferedBytes == Long.MAX_VALUE){
+//	            filePosition += transferedBytes;
+//	            transferedBytes = fos.getChannel().transferFrom(rbc, filePosition, Long.MAX_VALUE);
+//	        }
+//	        rbc.close();
+//	        fos.close();
 		}
 		
-		return null;
 	}
 }

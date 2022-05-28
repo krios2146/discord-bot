@@ -10,7 +10,7 @@ import org.json.JSONObject;
 public class Bot {
 	
 	public static void main(String[] args) {   
-		// Initialize bot
+		// Initialize Bot
 		DiscordApi api = new DiscordApiBuilder()
 				.setToken("OTc3MTE2NzkwODE3Njg5NjMy.GHH4Mw.aeiV7SkJgKt27fGNVmMrLElifiE5sq1SPNkHoQ")
 				.login().join();
@@ -25,22 +25,32 @@ public class Bot {
 					e.printStackTrace();
 				}
 				
+				File timetableFile = new File("C:/Users/daun2146/Downloads/timetable.pdf");
+				
 				MessageBuilder mb = new MessageBuilder();
-				mb.append(messageText)
-			    	.addAttachment(new File("C:/Users/daun2146/Downloads/timetable.pdf"))
-			    	.send(message.getChannel());
+				mb.append(messageText);
+				if (timetableFile.exists()) {
+					mb.addAttachment(timetableFile);
+				} else {
+					mb.append("File wasn't downloaded");
+				}
+				mb.send(message.getChannel());
 			}
 		});
 	}
 	
 	private static String getSchedule() throws Exception {
-		// GET meta information request
+		// GET Request - Meta Information about public resource
 		HttpURLConnection url = new HttpURLConnection();
 		String jsonMeta = url.sendGETMetaInfo();
 		
+		if (jsonMeta == null) {
+			return "Something went wrong [Meta Request]\n";
+		}
+		
 		JSONParser metaParser = new JSONParser(jsonMeta);
 		
-		// Get tomorrow date
+		// Find which day we need a timetable
 		Calendar calendar = new GregorianCalendar();
 		calendar.add(Calendar.DAY_OF_YEAR, 1);
 		
@@ -51,15 +61,26 @@ public class Bot {
 		SimpleDateFormat formatForDate = new SimpleDateFormat("dd.MM.yyyy");
 	    String tomorrow = formatForDate.format(calendar.getTime());
 		
-	    // Find path for tomorrow timetable
+	    // Get and format path for request
 	    String path = metaParser.getPathByName(tomorrow);
+	    
+		if (path == null) {
+			return "Something went wrong [Find Name]\n";
+		}
+		
 	    path = path.replaceAll("\\s", "%20");
 	    
-	    // GET download request
-	    String downloadJsonStr = url.sendGETDownload(path);    
+	    // GET Request - Ask for download
+	    String downloadJsonStr = url.sendGETDownload(path);
+	    
+		if (downloadJsonStr == null) {
+			return "Something went wrong [Download Request]\n";
+		}
+		
 	    JSONObject downloadJson = new JSONObject(downloadJsonStr);
 	    String downloadLink = downloadJson.getString("href");
 	    
+	    // GET Request - Download file
 	    url.sendGETFile(downloadLink);
 	    
 	    return "Timetable for " + tomorrow;
